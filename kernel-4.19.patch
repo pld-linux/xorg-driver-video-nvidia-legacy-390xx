@@ -1,0 +1,48 @@
+--- NVIDIA-Linux-x86_64-390.87-no-compat32/kernel/nvidia-drm/nvidia-drm-encoder.c.orig	2018-08-22 02:55:29.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.87-no-compat32/kernel/nvidia-drm/nvidia-drm-encoder.c	2018-10-27 14:51:02.291106466 +0200
+@@ -30,6 +30,9 @@
+ #include "nvidia-drm-connector.h"
+ #include "nvidia-drm-crtc.h"
+ 
++#include <linux/version.h>
++#include <linux/utsname.h>
++
+ #include <drm/drm_crtc_helper.h>
+ 
+ #include <drm/drm_atomic.h>
+@@ -216,7 +219,11 @@
+ 
+     /* Attach encoder and connector */
+ 
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
+     ret = drm_mode_connector_attach_encoder(connector, encoder);
++#else
++    ret = drm_connector_attach_encoder(connector, encoder);
++#endif
+ 
+     if (ret != 0) {
+         NV_DRM_DEV_LOG_ERR(
+--- NVIDIA-Linux-x86_64-390.87-no-compat32/kernel/nvidia-drm/nvidia-drm-connector.c~	2018-08-22 02:55:29.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.87-no-compat32/kernel/nvidia-drm/nvidia-drm-connector.c	2018-10-27 14:54:53.714379051 +0200
+@@ -30,6 +30,9 @@
+ #include "nvidia-drm-utils.h"
+ #include "nvidia-drm-encoder.h"
+ 
++#include <linux/version.h>
++#include <linux/utsname.h>
++
+ #include <drm/drm_crtc_helper.h>
+ 
+ #include <drm/drm_atomic.h>
+@@ -226,7 +229,11 @@
+ 
+ 
+     if (nv_connector->edid != NULL) {
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
+         drm_mode_connector_update_edid_property(
++#else
++        drm_connector_update_edid_property(
++#endif
+             connector, nv_connector->edid);
+     }
+ 
