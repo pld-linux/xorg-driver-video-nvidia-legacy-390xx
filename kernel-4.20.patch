@@ -26,6 +26,15 @@
  {
 --- NVIDIA-Linux-x86_64-390.87-no-compat32/kernel/nvidia-drm/nvidia-drm-gem-nvkms-memory.c~	2018-08-22 09:55:29.000000000 +0900
 +++ NVIDIA-Linux-x86_64-390.87-no-compat32/kernel/nvidia-drm/nvidia-drm-gem-nvkms-memory.c	2019-01-02 10:00:43.465451775 +0900
+@@ -24,6 +24,8 @@
+ 
+ #if defined(NV_DRM_ATOMIC_MODESET_AVAILABLE)
+ 
++#include <linux/mm.h>
++
+ #include "nvidia-drm-gem-nvkms-memory.h"
+ #include "nvidia-drm-ioctl.h"
+ 
 @@ -237,6 +237,9 @@
  
      page_offset = vmf->pgoff - drm_vma_node_start(&gem->vma_node);
