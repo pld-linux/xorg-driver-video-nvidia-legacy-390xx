@@ -30,7 +30,7 @@
  
  #if defined(NV_DRM_ATOMIC_MODESET_AVAILABLE)
  
-+#include <linux/mm.h>
++#include <linux/version.h>
 +
  #include "nvidia-drm-gem-nvkms-memory.h"
  #include "nvidia-drm-ioctl.h"
@@ -39,7 +39,7 @@
  
      page_offset = vmf->pgoff - drm_vma_node_start(&gem->vma_node);
  
-+#if !defined(vm_insert_pfn)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0)
 +    return vmf_insert_pfn(vma, address, pfn + page_offset);
 +#else
      ret = vm_insert_pfn(vma, address, pfn + page_offset);
