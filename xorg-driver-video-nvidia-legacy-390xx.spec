@@ -274,8 +274,8 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %patch2 -p1
 %ifarch %{x8664}
 %patch3 -p1
-%endif
 %patch4 -p1
+%endif
 echo 'EXTRA_CFLAGS += -Wno-pointer-arith -Wno-sign-compare -Wno-unused' >> kernel/Makefile.kbuild
 
 %build
