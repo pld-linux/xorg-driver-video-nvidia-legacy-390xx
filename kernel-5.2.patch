@@ -1,0 +1,29 @@
+--- NVIDIA-Linux-x86_64-390.116-no-compat32/kernel/nvidia-uvm/uvm8_tools.c~	2019-01-28 00:12:22.000000000 +0800
++++ NVIDIA-Linux-x86_64-390.116-no-compat32/kernel/nvidia-uvm/uvm8_tools.c	2019-07-12 21:57:52.529905949 +0800
+@@ -204,7 +204,7 @@
+     return event_tracker != NULL && !event_tracker->is_queue;
+ }
+ 
+-static void put_user_pages(struct page **pages, NvU64 page_count)
++static void nv_put_user_pages(struct page **pages, NvU64 page_count)
+ {
+     NvU64 i;
+     for (i = 0; i < page_count; i++)
+@@ -215,7 +215,7 @@
+ {
+     size = DIV_ROUND_UP(size, PAGE_SIZE);
+     vunmap((NvU8 *)addr);
+-    put_user_pages(pages, size);
++    nv_put_user_pages(pages, size);
+     uvm_kvfree(pages);
+ }
+ 
+@@ -279,7 +279,7 @@
+     uvm_kvfree(vmas);
+ 
+     if (ret > 0)
+-        put_user_pages(*pages, ret);
++        nv_put_user_pages(*pages, ret);
+     else if (ret < 0)
+         status = errno_to_nv_status(ret);
+ 
