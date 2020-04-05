@@ -138,7 +138,7 @@ index ec9e093..463a464 100755
          ioremap_wc)
              #
              # Determine if the ioremap_wc() function is present.
-@@ -1430,6 +1446,31 @@ compile_test() {
+@@ -1430,6 +1446,29 @@ compile_test() {
              compile_check_conftest "$CODE" "NV_SG_ALLOC_TABLE_FROM_PAGES_PRESENT" "" "functions"
          ;;
  
@@ -159,12 +159,10 @@ index ec9e093..463a464 100755
 +            CODE="
 +            #include <linux/ktime.h>
 +            int conftest_ktime_get_raw_ts64(void) {
-+                struct timespec64 ts = {0};
-+
-+                ktime_get_raw_ts64(&ts);
++                ktime_get_raw_ts64();
 +            }"
 +
-+            compile_check_conftest "$CODE" "NV_KTIME_GET_RAW_TS64_PRESENT" "" "types"
++            compile_check_conftest "$CODE" "NV_KTIME_GET_RAW_TS64_PRESENT" "" "functions"
 +        ;;
 +
          efi_enabled)
