@@ -240,13 +240,6 @@ sterownik nVidii dla Xorg/XFree86.\
 
 %define build_kernel_pkg()\
 cd kernel\
-#cat >> Makefile <<'EOF'\
-#\
-#$(obj)/nv-kernel.o: $(src)/nv-kernel.o.bin\
-#	cp $< $@\
-#EOF\
-#mv nv-kernel.o{,.bin}\
-#build_kernel_modules -m nvidia\
 %{__make} SYSSRC=%{_kernelsrcdir} clean\
 %{__make} SYSSRC=%{_kernelsrcdir} IGNORE_CC_MISMATCH=1 NV_VERBOSE=1 CC=%{__cc} module\
 cd ..\

@@ -83,15 +83,20 @@ diff --git a/kernel/common/inc/nv-time.h b/kernel/common/inc/nv-time.h
 index 2c799c9..0206062 100644
 --- a/kernel/common/inc/nv-time.h
 +++ b/kernel/common/inc/nv-time.h
-@@ -30,7 +30,12 @@
+@@ -30,7 +30,17 @@
  #include <linux/ktime.h>
  #endif
  
 -static inline void nv_gettimeofday(struct timeval *tv)
++#include <linux/version.h>
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 6, 0)
++#define nv_timeval timeval
++#else
 +struct nv_timeval {
 +    __kernel_long_t      tv_sec;
 +    __kernel_suseconds_t tv_usec;
 +};
++#endif
 +
 +static inline void nv_gettimeofday(struct nv_timeval *tv)
  {
@@ -156,10 +161,10 @@ index ec9e093..463a464 100755
 +            int conftest_ktime_get_raw_ts64(void) {
 +                struct timespec64 ts = {0};
 +
-+                ktime_get_raw_ts64(&ts64);
++                ktime_get_raw_ts64(&ts);
 +            }"
 +
-+            compile_check_conftest "$CODE" "NV_KTIME_GET_RAW_TS64_PRESENT" "" "functions"
++            compile_check_conftest "$CODE" "NV_KTIME_GET_RAW_TS64_PRESENT" "" "types"
 +        ;;
 +
          efi_enabled)
