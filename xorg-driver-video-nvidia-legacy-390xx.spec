@@ -244,9 +244,7 @@ cd kernel\
 cd ..\
 %install_kernel_modules -D installed -m kernel/nvidia,kernel/nvidia-drm,kernel/nvidia-modeset -d misc\
 %ifarch %{x8664}\
-%if %{_kernel_version_code} < %{_kernel_version_magic 5 8 0}\
 %install_kernel_modules -D installed -m kernel/nvidia-uvm -d misc\
-%endif\
 %endif\
 %{nil}
 
