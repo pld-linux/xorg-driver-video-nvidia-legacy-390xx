@@ -33,7 +33,7 @@ exit 1
 
 %define		no_install_post_check_so 1
 
-%define		rel	2
+%define		rel	3
 %define		pname	xorg-driver-video-nvidia-legacy-390xx
 Summary:	Linux Drivers for nVidia GeForce/Quadro Chips
 Summary(hu.UTF-8):	Linux meghajtók nVidia GeForce/Quadro chipekhez
@@ -57,6 +57,7 @@ Patch0:		X11-driver-nvidia-GL.patch
 Patch1:		X11-driver-nvidia-desktop.patch
 Patch2:		kernel-5.8.patch
 Patch3:		kernel-5.8-uvm.patch
+Patch4:		kernel-5.9.patch
 URL:		http://www.nvidia.com/object/unix.html
 BuildRequires:	rpmbuild(macros) >= 1.701
 %{?with_kernel:%{expand:%buildrequires_kernel kernel%%{_alt_kernel}-module-build >= 3:2.6.20.2}}
@@ -267,6 +268,7 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %ifarch %{x8664}
 %patch3 -p1
 %endif
+%patch4 -p1
 echo 'EXTRA_CFLAGS += -Wno-pointer-arith -Wno-sign-compare -Wno-unused' >> kernel/Makefile.kbuild
 
 %build
