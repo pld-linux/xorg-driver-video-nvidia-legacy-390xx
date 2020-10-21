@@ -323,30 +323,6 @@ index 8cb2d5e..e30b2b6 100644
  
      dst->timings.pixelClockHz = src->clock * 1000; /* In Hz */
  
-diff --git a/kernel/nvidia-uvm/uvm8_tools.c b/kernel/nvidia-uvm/uvm8_tools.c
-index 86dbb77..63d0b64 100644
---- a/kernel/nvidia-uvm/uvm8_tools.c
-+++ b/kernel/nvidia-uvm/uvm8_tools.c
-@@ -190,7 +190,6 @@ static uvm_tools_event_tracker_t *tools_event_tracker(struct file *filp)
- {
-     long event_tracker = atomic_long_read((atomic_long_t *)&filp->private_data);
- 
--    smp_read_barrier_depends();
-     return (uvm_tools_event_tracker_t *)event_tracker;
- }
- 
-diff --git a/kernel/nvidia-uvm/uvm8_va_range.h b/kernel/nvidia-uvm/uvm8_va_range.h
-index 8cae357..6166cc8 100644
---- a/kernel/nvidia-uvm/uvm8_va_range.h
-+++ b/kernel/nvidia-uvm/uvm8_va_range.h
-@@ -717,7 +717,6 @@ static uvm_va_block_t *uvm_va_range_block(uvm_va_range_t *va_range, size_t index
-     // make sure that any initialization of this block by the creating thread is
-     // visible to later accesses in this thread, which requires a data
-     // dependency barrier.
--    smp_read_barrier_depends();
-     return block;
- }
- 
 diff --git a/kernel/nvidia/nv.c b/kernel/nvidia/nv.c
 index 15983f6..cfb2375 100644
 --- a/kernel/nvidia/nv.c
@@ -363,3 +339,16 @@ index 15983f6..cfb2375 100644
  #endif
 
 
+--- NVIDIA-Linux-x86_64-390.138-no-compat32/kernel/nvidia/nvidia.Kbuild~	2020-05-14 12:29:28.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.138-no-compat32/kernel/nvidia/nvidia.Kbuild	2020-10-21 09:20:14.480482097 +0200
+@@ -205,4 +205,10 @@
+ NV_CONFTEST_GENERIC_COMPILE_TESTS += list_cut_position
+ NV_CONFTEST_GENERIC_COMPILE_TESTS += vm_fault_t
+ 
++NV_CONFTEST_FUNCTION_COMPILE_TESTS += drm_gem_object_put_unlocked
++NV_CONFTEST_TYPE_COMPILE_TESTS += drm_display_mode_has_vrefresh
++NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_master_set_has_int_return_type
++NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_has_gem_free_object
++NV_CONFTEST_FUNCTION_COMPILE_TESTS += vga_tryget
++
+ NV_CONFTEST_MACRO_COMPILE_TESTS += INIT_WORK
