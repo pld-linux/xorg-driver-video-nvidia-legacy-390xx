@@ -58,6 +58,7 @@ Patch1:		X11-driver-nvidia-desktop.patch
 Patch2:		kernel-5.8.patch
 Patch3:		kernel-5.8-uvm.patch
 Patch4:		kernel-5.9.patch
+Patch5:		kernel-5.9-uvm.patch
 URL:		http://www.nvidia.com/object/unix.html
 BuildRequires:	rpmbuild(macros) >= 1.701
 %{?with_kernel:%{expand:%buildrequires_kernel kernel%%{_alt_kernel}-module-build >= 3:2.6.20.2}}
@@ -265,10 +266,11 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch4 -p1
 %ifarch %{x8664}
 %patch3 -p1
+%patch5 -p1
 %endif
-%patch4 -p1
 echo 'EXTRA_CFLAGS += -Wno-pointer-arith -Wno-sign-compare -Wno-unused' >> kernel/Makefile.kbuild
 
 %build
