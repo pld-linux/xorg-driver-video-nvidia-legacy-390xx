@@ -1,0 +1,177 @@
+diff --color -ur NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/common/inc/nv-linux.h NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/common/inc/nv-linux.h
+--- NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/common/inc/nv-linux.h	2020-12-28 17:25:19.000000000 +0100
++++ NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/common/inc/nv-linux.h	2021-02-25 18:20:36.357193386 +0100
+@@ -115,7 +115,9 @@
+ 
+ #include <linux/moduleparam.h>      /* module_param()                   */
+ #include <asm/tlbflush.h>           /* flush_tlb(), flush_tlb_all()     */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0)
+ #include <asm/kmap_types.h>         /* page table entry lookup          */
++#endif
+ 
+ #include <linux/pci.h>              /* pci_find_class, etc              */
+ #include <linux/interrupt.h>        /* tasklets, interrupt helpers      */
+diff --color -ur NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/conftest.sh NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/conftest.sh
+--- NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/conftest.sh	2020-12-18 06:56:44.000000000 +0100
++++ NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/conftest.sh	2021-02-25 18:20:36.357193386 +0100
+@@ -1748,14 +1748,6 @@
+             void conftest_drm_available(void) {
+                 struct drm_driver drv;
+ 
+-                /* 2013-01-15 89177644a7b6306e6084a89eab7e290f4bfef397 */
+-                drv.gem_prime_pin = 0;
+-                drv.gem_prime_get_sg_table = 0;
+-                drv.gem_prime_vmap = 0;
+-                drv.gem_prime_vunmap = 0;
+-                (void)drm_gem_prime_import;
+-                (void)drm_gem_prime_export;
+-
+                 /* 2013-10-02 1bb72532ac260a2d3982b40bdd4c936d779d0d16 */
+                 (void)drm_dev_alloc;
+ 
+@@ -4354,6 +4346,74 @@
+             compile_check_conftest "$CODE" "NV_DRM_PRIME_PAGES_TO_SG_HAS_DRM_DEVICE_ARG" "" "types"
+         ;;
+ 
++        drm_driver_has_gem_prime_callbacks)
++            #
++            # Determine if drm_driver structure has the GEM and PRIME callback
++            # function pointers.
++            #
++            # The GEM and PRIME callback are removed from drm_driver
++            # structure, by commit d693def4fd1c ("drm: Remove obsolete GEM and
++            # PRIME callbacks from struct drm_driver").
++            #
++            CODE="
++            #if defined(NV_DRM_DRMP_H_PRESENT)
++            #include <drm/drmP.h>
++            #endif
++
++            #if defined(NV_DRM_DRM_DRV_H_PRESENT)
++            #include <drm/drm_drv.h>
++            #endif
++
++            void conftest_drm_driver_has_gem_and_prime_callbacks(void) {
++                struct drm_driver drv;
++
++                drv.gem_prime_pin = 0;
++                drv.gem_prime_get_sg_table = 0;
++                drv.gem_prime_vmap = 0;
++                drv.gem_prime_vunmap = 0;
++                drv.gem_vm_ops = 0;
++            }"
++
++            compile_check_conftest "$CODE" "NV_DRM_DRIVER_HAS_GEM_PRIME_CALLBACKS" "" "types"
++        ;;
++
++        drm_crtc_atomic_check_has_atomic_state_arg)
++            #
++            # Determine if drm_crtc_helper_funcs::atomic_check takes 'state'
++            # argument of 'struct drm_atomic_state' type.
++            #
++            # The commit 29b77ad7b9ca ("drm/atomic: Pass the full state to CRTC
++            # atomic_check") passed the full atomic state to
++            # drm_crtc_helper_funcs::atomic_check()
++            #
++            # Turning incompatible-pointer-types check into error is necessary
++            # to make test fail if drm_crtc_helper_funcs::atomic_check is taking
++            # 'crtc_state' instead of 'state', otherwise test simply pass
++            # because compilation succeeds throwing incompatible-pointer-types
++            # warning. This test is expected to fail on Linux kernels <= v5.10,
++            # the commit ea8daa7b9784 ("kbuild: Add option to turn incompatible
++            # pointer check into error") has turned incompatible-pointer-types
++            # check into error from v4.6.
++            #
++            echo "$CONFTEST_PREAMBLE
++            #include <drm/drm_modeset_helper_vtables.h>
++            int conftest_drm_crtc_atomic_check_has_atomic_state_arg(
++                    struct drm_crtc *crtc, struct drm_atomic_state *state) {
++                const struct drm_crtc_helper_funcs *funcs = crtc->helper_private;
++                return funcs->atomic_check(crtc, state);
++            }" > conftest$$.c
++
++            $CC $CFLAGS -Werror=incompatible-pointer-types -c conftest$$.c > /dev/null 2>&1
++            rm -f conftest$$.c
++
++            if [ -f conftest$$.o ]; then
++                rm -f conftest$$.o
++                echo "#define NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG" | append_conftest "types"
++            else
++                echo "#undef NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG" | append_conftest "types"
++            fi
++        ;;
++
+     esac
+ }
+ 
+diff --color -ur NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/nvidia-drm/nvidia-drm-crtc.c NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/nvidia-drm/nvidia-drm-crtc.c
+--- NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/nvidia-drm/nvidia-drm-crtc.c	2020-12-28 17:25:22.000000000 +0100
++++ NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/nvidia-drm/nvidia-drm-crtc.c	2021-02-25 18:20:36.360526434 +0100
+@@ -336,9 +336,18 @@
+  * the 'nv_drm_crtc_state::req_config', that is fine becase 'nv_drm_crtc_state'
+  * will be discarded if ->atomic_check() fails.
+  */
++#if defined(NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG)
++static int nv_drm_crtc_atomic_check(struct drm_crtc *crtc,
++                                    struct drm_atomic_state *state)
++#else
+ static int nv_drm_crtc_atomic_check(struct drm_crtc *crtc,
+                                     struct drm_crtc_state *crtc_state)
++#endif
+ {
++#if defined(NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG)
++    struct drm_crtc_state *crtc_state =
++        drm_atomic_get_new_crtc_state(state, crtc);
++#endif
+     struct nv_drm_crtc_state *nv_crtc_state = to_nv_crtc_state(crtc_state);
+     struct NvKmsKapiHeadRequestedConfig *req_config =
+         &nv_crtc_state->req_config;
+@@ -408,8 +417,13 @@
+ }
+ 
+ #ifdef NV_DRM_CRTC_HELPER_FUNCS_HAS_ATOMIC_ENABLE
++#if defined(NV_DRM_CRTC_ATOMIC_CHECK_HAS_ATOMIC_STATE_ARG)
++static void nv_drm_crtc_atomic_enable(struct drm_crtc *crtc,
++                                      struct drm_atomic_state *state)
++#else
+ static void nv_drm_crtc_atomic_enable(struct drm_crtc *crtc,
+                                       struct drm_crtc_state *old_crtc_state)
++#endif
+ {
+ 
+ }
+diff --color -ur NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/nvidia-drm/nvidia-drm-drv.c NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c
+--- NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/nvidia-drm/nvidia-drm-drv.c	2020-12-28 17:25:22.000000000 +0100
++++ NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c	2021-02-25 18:20:51.539230188 +0100
+@@ -700,10 +700,12 @@
+     .num_ioctls             = ARRAY_SIZE(nv_drm_ioctls),
+ 
+     .prime_handle_to_fd     = drm_gem_prime_handle_to_fd,
++#if defined(NV_DRM_DRIVER_HAS_GEM_PRIME_CALLBACKS)
+     .gem_prime_export       = nv_drm_gem_prime_export,
+     .gem_prime_get_sg_table = nv_drm_gem_prime_get_sg_table,
+     .gem_prime_vmap         = nv_drm_gem_prime_vmap,
+     .gem_prime_vunmap       = nv_drm_gem_prime_vunmap,
++#endif
+ 
+ #if defined(NV_DRM_DRIVER_HAS_GEM_PRIME_RES_OBJ)
+     .gem_prime_res_obj      = nv_drm_gem_prime_res_obj,
+@@ -759,7 +761,9 @@
+     nv_drm_driver.dumb_map_offset  = nv_drm_dumb_map_offset;
+     nv_drm_driver.dumb_destroy     = drm_gem_dumb_destroy;
+ 
++#if defined(NV_DRM_DRIVER_HAS_GEM_PRIME_CALLBACKS)
+     nv_drm_driver.gem_vm_ops       = &nv_drm_gem_vma_ops;
++#endif
+ #endif /* NV_DRM_ATOMIC_MODESET_AVAILABLE */
+ }
+ 
+diff --color -ur NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/nvidia-drm/nvidia-drm.Kbuild NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild
+--- NVIDIA-Linux-x86_64-390.141-no-compat32.orig/kernel/nvidia-drm/nvidia-drm.Kbuild	2020-12-18 06:56:50.000000000 +0100
++++ NVIDIA-Linux-x86_64-390.141-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild	2021-02-25 18:20:36.360526434 +0100
+@@ -98,3 +98,5 @@
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_master_set_has_int_return_type
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_has_gem_free_object
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_prime_pages_to_sg_has_drm_device_arg
++NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_has_gem_prime_callbacks
++NV_CONFTEST_TYPE_COMPILE_TESTS += drm_crtc_atomic_check_has_atomic_state_arg
