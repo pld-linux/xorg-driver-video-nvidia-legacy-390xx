@@ -26,14 +26,11 @@ exit 1
 %define		vulkan_lib	libGL.so.1
 %endif
 
-%if %{without userspace}
-# nothing to be placed to debuginfo package
 %define		_enable_debug_packages	0
-%endif
 
 %define		no_install_post_check_so 1
 
-%define		rel	2
+%define		rel	3
 %define		pname	xorg-driver-video-nvidia-legacy-390xx
 Summary:	Linux Drivers for nVidia GeForce/Quadro Chips
 Summary(hu.UTF-8):	Linux meghajtók nVidia GeForce/Quadro chipekhez
