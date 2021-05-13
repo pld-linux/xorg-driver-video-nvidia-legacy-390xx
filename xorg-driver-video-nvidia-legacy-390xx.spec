@@ -128,6 +128,9 @@ Obsoletes:	X11-OpenGL-core < 1:7.0.0
 Obsoletes:	X11-OpenGL-libGL < 1:7.0.0
 Obsoletes:	XFree86-OpenGL-core < 1:7.0.0
 Obsoletes:	XFree86-OpenGL-libGL < 1:7.0.0
+%if %{with glvnd} && %{with system_libglvnd}
+Obsoletes:	xorg-driver-video-nvidia-legacy-390xx-devel < 390.143-2
+%endif
 
 %description libs
 NVIDIA OpenGL (GL and GLX only) implementation libraries.
@@ -441,6 +444,7 @@ EOF
 %if %{without system_libglvnd}
 %attr(755,root,root) %{_libdir}/nvidia/libGL.so.1.7.0
 %attr(755,root,root) %ghost %{_libdir}/nvidia/libGL.so.1
+%attr(755,root,root) %{_libdir}/nvidia/libGL.so
 %attr(755,root,root) %{_libdir}/nvidia/libGLX.so.0
 %attr(755,root,root) %{_libdir}/nvidia/libOpenGL.so.0
 %attr(755,root,root) %{_libdir}/nvidia/libGLdispatch.so.0
@@ -466,6 +470,7 @@ EOF
 %else
 %attr(755,root,root) %{_libdir}/nvidia/libGL.so.*.*
 %attr(755,root,root) %ghost %{_libdir}/nvidia/libGL.so.1
+%attr(755,root,root) %{_libdir}/nvidia/libGL.so
 %endif
 %attr(755,root,root) %{_libdir}/nvidia/libcuda.so.*.*
 %attr(755,root,root) %ghost %{_libdir}/nvidia/libcuda.so.1
@@ -499,26 +504,23 @@ EOF
 %endif
 %{_datadir}/vulkan/icd.d/nvidia_icd.json
 
+%if %{without glvnd} || %{without system_libglvnd}
 %files devel
 %defattr(644,root,root,755)
-%dir %{_includedir}/GL
-%{_includedir}/GL/gl.h
-%{_includedir}/GL/glext.h
-%{_includedir}/GL/glx.h
-%{_includedir}/GL/glxext.h
 %if %{with glvnd}
-%if %{without system_libglvnd}
-%attr(755,root,root) %{_libdir}/nvidia/libGL.so
 %attr(755,root,root) %{_libdir}/nvidia/libGLX.so
 %attr(755,root,root) %{_libdir}/nvidia/libOpenGL.so
 %attr(755,root,root) %{_libdir}/nvidia/libGLESv1_CM.so
 %attr(755,root,root) %{_libdir}/nvidia/libGLESv2.so
 %attr(755,root,root) %{_libdir}/nvidia/libEGL.so
 %endif
-%else
-%attr(755,root,root) %{_libdir}/nvidia/libGL.so
-%endif
+%dir %{_includedir}/GL
+%{_includedir}/GL/gl.h
+%{_includedir}/GL/glext.h
+%{_includedir}/GL/glx.h
+%{_includedir}/GL/glxext.h
 %{_pkgconfigdir}/gl.pc
+%endif
 
 %files doc
 %defattr(644,root,root,755)
