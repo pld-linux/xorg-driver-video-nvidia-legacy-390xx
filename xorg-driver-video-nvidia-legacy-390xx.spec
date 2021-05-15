@@ -122,7 +122,7 @@ Requires:	libglvnd-libGL
 Requires:	libglvnd-libGLES
 %endif
 Requires:	libvdpau >= 0.3
-Provides:	OpenGL = 3.3
+Provides:	OpenGL = 4.3
 Provides:	OpenGL-GLX = 1.4
 Obsoletes:	X11-OpenGL-core < 1:7.0.0
 Obsoletes:	X11-OpenGL-libGL < 1:7.0.0
@@ -145,7 +145,7 @@ Summary(pl.UTF-8):	Pliki nagłówkowe OpenGL (GL i GLX)
 Group:		X11/Development/Libraries
 Requires:	%{pname}-libs = %{epoch}:%{version}-%{rel}
 Provides:	OpenGL-GLX-devel = 1.4
-Provides:	OpenGL-devel = 2.1
+Provides:	OpenGL-devel = 3.0
 Obsoletes:	X11-OpenGL-devel-base < 1:7.0.0
 Obsoletes:	XFree86-OpenGL-devel-base < 1:7.0.0
 Obsoletes:	XFree86-driver-nvidia-devel < 1.0.5336-4
