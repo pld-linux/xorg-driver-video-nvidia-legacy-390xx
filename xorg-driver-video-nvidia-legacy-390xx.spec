@@ -1,6 +1,5 @@
 # TODO
-# - should -libs Require main package?
-# - drop binary-only nvidia-settings from here, and use nvidia-settings.spec for it?
+# - drop binary-only nvidia-settings from here, and use nvidia-settings.spec for it
 # - kernel-drm is required on never kernels. driver for kernel-longterm not requires drm
 #
 # Conditional build:
@@ -79,37 +78,85 @@ BuildRoot:	%{tmpdir}/%{pname}-%{version}-root-%(id -u -n)
 %description
 This driver set adds improved 2D functionality to the Xorg X server as
 well as high performance OpenGL acceleration, AGP support, support for
-most flat panels, and 2D multiple monitor support. Supported hardware:
-modern NVIDIA GeForce (from GeForce2 MX) and Quadro (Quadro4 and up)
-based graphics accelerators.
+most flat panels, and 2D multiple monitor support.
 
-The older graphics chips are unsupported:
-- NV1 and RIVA 128/128ZX chips are supported in the base Xorg install
-  (nv driver)
-- TNT/TNT2/GeForce 256/GeForce2 Ultra/Quadro2 are suported by -legacy
-  drivers.
+Supported hardware:
+- GeForce 400/400M series (excluding 405)
+- GeForce 500/500M series
+- GeForce 600/600M series
+- GeForce 700/700M series
+- GeForce 800M series
+- GeForce 900/900M series
+- GeForce 10 series (excluding GT 1010)
+- GeForce 10 mobile series
+- GeForce MX100 series
+- GeForce TITAN series (GTX TITAN Z/GTX TITAN Black/GTX TITAN/
+  GTX TITAN X)
+- NVIDIA TITAN series (X/Xp/V)
+- NVS series (NVS 310/NVS 315/NVS 510/NVS 810)
+- NVS mobile series (NVS 4200M/NVS 5200M/NVS 5400M)
+- Quadro SDI
+- Quadro Sync series (G-Sync II/Sync/Sync II)
+- Quadro NVS series (NVS 310/NVS 315/NVS 510/NVS 810)
+- Quadro NVS mobile series (NVS 4200M/NVS 5200M/NVS 5400M)
+- Quadro Blade/Embedded series
+- Quadro series (excluding P2200 and 400)
+- Quadro mobile series (excluding T*/P520)
 
 %description -l hu.UTF-8
 Ez a meghajtó kibővíti az Xorg X szerver 2D működését OpenGL
 gyorsítással, AGP támogatással és támogatja a több monitort.
-Támogatott hardverek: modern NVIDIA GeForce (GeForce2 MX-től) és
-Quadro (Quadro4 és újabbak) alapú grafikai gyorsítók.
 
-A régekbbi grafikus chipek nem támogatottak:
-- NV1 és RIVA 128/128ZX chipek az alap Xorg telepítéssel (nv meghajtó)
-- TNT/TNT2/GeForce 256/GeForce2 Ultra/Quadro2 a -legacy driverekkel
-  támogatottak.
+Támogatott hardverek:
+- GeForce 400/400M series (- 405)
+- GeForce 500/500M series
+- GeForce 600/600M series
+- GeForce 700/700M series
+- GeForce 800M series
+- GeForce 900/900M series
+- GeForce 10 series (- GT 1010)
+- GeForce 10 mobile series
+- GeForce MX100 series
+- GeForce TITAN series (GTX TITAN Z/GTX TITAN Black/GTX TITAN/
+  GTX TITAN X)
+- NVIDIA TITAN series (X/Xp/V)
+- NVS series (NVS 310/NVS 315/NVS 510/NVS 810)
+- NVS mobile series (NVS 4200M/NVS 5200M/NVS 5400M)
+- Quadro SDI
+- Quadro Sync series (G-Sync II/Sync/Sync II)
+- Quadro NVS series (NVS 310/NVS 315/NVS 510/NVS 810)
+- Quadro NVS mobile series (NVS 4200M/NVS 5200M/NVS 5400M)
+- Quadro Blade/Embedded series
+- Quadro series (- P2200 and 400)
+- Quadro mobile series (- T*/P520)
 
 %description -l pl.UTF-8
 Usprawnione sterowniki dla kart graficznych nVidia do serwera Xorg,
 dające wysokowydajną akcelerację OpenGL, obsługę AGP i wielu monitorów
-2D. Obsługują w miarę nowe karty NVIDIA GeForce (od wersji GeForce2
-MX) oraz Quadro (od wersji Quadro4).
+2D.
 
-Starsze układy graficzne nie są obsługiwane przez ten pakiet:
-- NV1 i RIVA 128/128ZX są obsługiwane przez sterownik nv z Xorg
-- TNT/TNT2/GeForce 256/GeForce 2 Ultra/Quadro 2 są obsługiwane przez
-  sterowniki -legacy
+Obsługują karty:
+- GeForce serii 400/400M (oprócz 405)
+- GeForce serii 500/500M
+- GeForce serii 600/600M
+- GeForce serii 700/700M
+- GeForce serii 800M
+- GeForce serii 900/900M
+- GeForce serii 10 (oprócz GT 1010)
+- GeForce serii 10 mobile
+- GeForce serii MX100
+- GeForce serii TITAN (GTX TITAN Z/GTX TITAN Black/GTX TITAN/
+  GTX TITAN X)
+- NVIDIA serii TITAN (X/Xp/V)
+- serii NVS (NVS 310/NVS 315/NVS 510/NVS 810)
+- serii NVS mobile (NVS 4200M/NVS 5200M/NVS 5400M)
+- Quadro SDI
+- Quadro serii Sync (G-Sync II/Sync/Sync II)
+- Quadro serii NVS (NVS 310/NVS 315/NVS 510/NVS 810)
+- Quadro serii NVS mobile (NVS 4200M/NVS 5200M/NVS 5400M)
+- Quadro serii Blade/Embedded
+- Quadro (oprócz P2200 and 400)
+- Quadro mobile (oprócz T*/P520)
 
 %package libs
 Summary:	OpenGL (GL and GLX) Nvidia libraries
