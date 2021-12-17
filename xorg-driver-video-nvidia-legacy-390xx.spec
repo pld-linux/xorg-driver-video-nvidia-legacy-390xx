@@ -3,7 +3,7 @@
 # - kernel-drm is required on never kernels. driver for kernel-longterm not requires drm
 #
 # Conditional build:
-%bcond_with	glvnd		# with GL vendor neutral libs
+%bcond_without	glvnd		# with GL vendor neutral libs
 %bcond_without	system_libglvnd	# do not use system libglvnd
 %bcond_without	kernel		# without kernel packages
 %bcond_without	userspace	# don't build userspace programs
@@ -29,7 +29,7 @@ exit 1
 
 %define		no_install_post_check_so 1
 
-%define		rel	1
+%define		rel	2
 %define		pname	xorg-driver-video-nvidia-legacy-390xx
 Summary:	Linux Drivers for nVidia GeForce/Quadro Chips
 Summary(hu.UTF-8):	Linux meghajtók nVidia GeForce/Quadro chipekhez
@@ -164,9 +164,9 @@ Summary(pl.UTF-8):	Biblioteki OpenGL (GL i GLX) Nvidia
 Group:		X11/Development/Libraries
 Requires(post,postun):	/sbin/ldconfig
 %if %{with glvnd} && %{with system_libglvnd}
-Requires:	libglvnd
-Requires:	libglvnd-libGL
-Requires:	libglvnd-libGLES
+Requires:	libglvnd >= 1.3.4-2
+Requires:	libglvnd-libGL >= 1.3.4-2
+Requires:	libglvnd-libGLES >= 1.3.4-2
 %endif
 Requires:	libvdpau >= 0.3
 Provides:	OpenGL = 4.3
