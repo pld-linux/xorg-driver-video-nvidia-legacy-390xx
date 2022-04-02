@@ -1,0 +1,10 @@
+--- NVIDIA-Linux-x86_64-390.147-no-compat32/kernel/nvidia-uvm/nvidia-uvm.Kbuild~	2021-12-13 15:04:30.000000000 +0100
++++ NVIDIA-Linux-x86_64-390.147-no-compat32/kernel/nvidia-uvm/nvidia-uvm.Kbuild	2022-04-02 21:49:28.303986549 +0200
+@@ -103,6 +103,7 @@
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += wait_on_bit_lock_argument_count
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += proc_create_data
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += pde_data
++NV_CONFTEST_FUNCTION_COMPILE_TESTS += pde_data_func
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += proc_remove
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += bitmap_clear
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += usleep_range
