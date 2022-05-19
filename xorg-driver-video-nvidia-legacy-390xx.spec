@@ -29,30 +29,28 @@ exit 1
 
 %define		no_install_post_check_so 1
 
-%define		rel	5
+%define		rel	1
 %define		pname	xorg-driver-video-nvidia-legacy-390xx
 Summary:	Linux Drivers for nVidia GeForce/Quadro Chips
 Summary(hu.UTF-8):	Linux meghajtók nVidia GeForce/Quadro chipekhez
 Summary(pl.UTF-8):	Sterowniki do kart graficznych nVidia GeForce/Quadro
 Name:		%{pname}%{?_pld_builder:%{?with_kernel:-kernel}}%{_alt_kernel}
 # when updating version here, keep nvidia-settings.spec in sync as well
-Version:	390.147
+Version:	390.151
 Release:	%{rel}%{?_pld_builder:%{?with_kernel:@%{_kernel_ver_str}}}
 Epoch:		1
 License:	nVidia Binary
 Group:		X11
 Source0:	https://us.download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}.run
-# Source0-md5:	7af8932a2ae9326cfe8638fe77d62441
+# Source0-md5:	fe68121d6846dc23ceec22ff005cc478
 Source1:	https://us.download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-no-compat32.run
-# Source1-md5:	7f2c2c04c6039b177d50b23a1ae223d6
+# Source1-md5:	9f91d1b97c6f4d66c4690dc4f6c1486f
 Source2:	%{pname}-xinitrc.sh
 Source3:	gl.pc.in
 Source4:	10-nvidia.conf
 Source5:	10-nvidia-modules.conf
 Patch0:		X11-driver-nvidia-GL.patch
 Patch1:		X11-driver-nvidia-desktop.patch
-Patch2:		kernel-5.17.patch
-Patch3:		kernel-5.17-x8664.patch
 URL:		https://www.nvidia.com/en-us/drivers/unix/
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
@@ -313,10 +311,6 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %endif
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
-%ifarch %{x8664}
-%patch3 -p1
-%endif
 echo 'EXTRA_CFLAGS += -Wno-pointer-arith -Wno-sign-compare -Wno-unused' >> kernel/Makefile.kbuild
 
 %build
