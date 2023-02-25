@@ -1,0 +1,121 @@
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh~	2022-10-11 18:00:50.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh	2023-02-25 14:19:47.560962975 +0100
+@@ -847,6 +847,24 @@
+ 
+             acpi_op_remove conftest_op_remove_routine;
+ 
++            void conftest_acpi_device_ops_remove(struct acpi_device *device) {
++                conftest_op_remove_routine(device);
++            }" > conftest$$.c
++
++            $CC $CFLAGS -c conftest$$.c > /dev/null 2>&1
++            rm -f conftest$$.c
++
++            if [ -f conftest$$.o ]; then
++                rm -f conftest$$.o
++                echo "#define NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT_VOID 1" | append_conftest "types"
++                return
++            fi
++
++            echo "$CONFTEST_PREAMBLE
++            #include <linux/acpi.h>
++
++            acpi_op_remove conftest_op_remove_routine;
++
+             int conftest_acpi_device_ops_remove(struct acpi_device *device) {
+                 return conftest_op_remove_routine(device);
+             }" > conftest$$.c
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/nv-acpi.c.orig	2022-10-12 11:30:26.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/nv-acpi.c	2023-02-25 14:32:19.579118091 +0100
+@@ -23,7 +23,9 @@
+ 
+ static int         nv_acpi_add             (struct acpi_device *);
+ 
+-#if !defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT) || (NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT == 2)
++#if defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT_VOID)
++static void        nv_acpi_remove_one_arg_void(struct acpi_device *device);
++#elif !defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT) || (NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT == 2)
+ static int         nv_acpi_remove_two_args(struct acpi_device *device, int type);
+ #else
+ static int         nv_acpi_remove_one_arg(struct acpi_device *device);
+@@ -73,7 +75,9 @@
+ #endif
+     .ops = {
+         .add = nv_acpi_add,
+-#if !defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT) || (NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT == 2)
++#if defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT_VOID)
++        .remove = nv_acpi_remove_one_arg_void,
++#elif !defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT) || (NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT == 2)
+         .remove = nv_acpi_remove_two_args,
+ #else
+         .remove = nv_acpi_remove_one_arg,
+@@ -331,7 +335,9 @@
+     return 0;
+ }
+ 
+-#if !defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT) || (NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT == 2)
++#if defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT_VOID)
++static void nv_acpi_remove_one_arg_void(struct acpi_device *device)
++#elif !defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT) || (NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT == 2)
+ static int nv_acpi_remove_two_args(struct acpi_device *device, int type)
+ #else
+ static int nv_acpi_remove_one_arg(struct acpi_device *device)
+@@ -385,7 +391,9 @@
+         device->driver_data = NULL;
+     }
+ 
++#if !defined(NV_ACPI_DEVICE_OPS_REMOVE_ARGUMENT_COUNT_VOID)
+     return status;
++#endif
+ }
+ 
+ static void nv_acpi_event(acpi_handle handle, u32 event_type, void *data)
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c~	2022-10-12 11:30:31.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c	2023-02-25 14:36:54.064187922 +0100
+@@ -60,6 +60,7 @@
+ #endif
+ 
+ #include <linux/pci.h>
++#include <linux/version.h>
+ 
+ /*
+  * Commit fcd70cd36b9b ("drm: Split out drm_probe_helper.h")
+@@ -240,9 +240,9 @@
+     dev->mode_config.prefer_shadow = 1;
+ 
+     /* Currently unused. Update when needed. */
+-
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+     dev->mode_config.fb_base = 0;
+-
++#endif
+     dev->mode_config.async_page_flip = false;
+ 
+     /* Initialize output polling support */
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-connector.c.orig	2022-10-12 11:30:31.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-connector.c	2023-02-25 14:44:30.759596334 +0100
+@@ -43,6 +43,8 @@
+ #include <drm/drm_atomic.h>
+ #include <drm/drm_atomic_helper.h>
+ 
++#include <linux/version.h>
++
+ static void nv_drm_connector_destroy(struct drm_connector *connector)
+ {
+     struct nv_drm_connector *nv_connector = to_nv_connector(connector);
+@@ -98,6 +100,7 @@
+             break;
+     }
+ 
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0)
+     if (connector->override_edid) {
+         const struct drm_property_blob *edid = connector->edid_blob_ptr;
+ 
+@@ -110,6 +113,7 @@
+                     sizeof(pDetectParams->edid.buffer));
+         }
+     }
++#endif
+ 
+     if (!nvKms->getDynamicDisplayInfo(nv_dev->pDevice, pDetectParams)) {
+         NV_DRM_DEV_LOG_ERR(
