@@ -1,0 +1,12 @@
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c~	2023-07-30 22:11:45.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c	2023-07-30 22:22:35.330911515 +0200
+@@ -763,7 +763,9 @@
+ 
+     nv_drm_driver.dumb_create      = nv_drm_dumb_create;
+     nv_drm_driver.dumb_map_offset  = nv_drm_dumb_map_offset;
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
+     nv_drm_driver.dumb_destroy     = nv_drm_dumb_destroy;
++#endif
+ 
+ #if defined(NV_DRM_DRIVER_HAS_GEM_PRIME_CALLBACKS)
+     nv_drm_driver.gem_vm_ops       = &nv_drm_gem_vma_ops;
