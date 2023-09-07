@@ -1,0 +1,42 @@
+diff --git a/kernel/nvidia-uvm/uvm8_tools.c b/kernel/nvidia-uvm/uvm8_tools.c
+index 1dc7c97d..ea521945 100644
+--- a/kernel/nvidia-uvm/uvm8_tools.c
++++ b/kernel/nvidia-uvm/uvm8_tools.c
+@@ -251,13 +251,37 @@ static NV_STATUS map_user_pages(NvU64 user_va, NvU64 size, void **addr, struct p
+     }
+ 
+     nv_mmap_read_lock(current->mm);
++#if defined(NV_GET_USER_PAGES_DROPPED_VMA)
++    ret = NV_GET_USER_PAGES(user_va, num_pages, 1, 0, *pages);
++#else
+     ret = NV_GET_USER_PAGES(user_va, num_pages, 1, 0, *pages, vmas);
++#endif
+     nv_mmap_read_unlock(current->mm);
+     if (ret != num_pages) {
+         status = NV_ERR_INVALID_ARGUMENT;
+         goto fail;
+     }
+ 
++#if defined(NV_GET_USER_PAGES_DROPPED_VMA)
++    struct vm_area_struct *vma;
++    unsigned long start;
++
++    nv_mmap_read_lock(current->mm);
++    start = user_va;
++    for (i = 0; i < num_pages; i++) {
++        vma = find_vma(current->mm, start);
++        if (!vma) {
++	    nv_mmap_read_unlock(current->mm);
++	    status = NV_ERR_INVALID_ARGUMENT;
++	    goto fail;
++	}
++
++        vmas[i] = vma;
++        start = (start + PAGE_SIZE) & PAGE_MASK;
++    }
++    nv_mmap_read_unlock(current->mm);
++#endif
++
+     for (i = 0; i < num_pages; i++) {
+         if (page_count((*pages)[i]) > MAX_PAGE_COUNT || uvm_file_is_nvidia_uvm(vmas[i]->vm_file)) {
+             status = NV_ERR_INVALID_ARGUMENT;
