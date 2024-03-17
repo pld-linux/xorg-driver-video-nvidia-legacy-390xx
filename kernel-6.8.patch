@@ -1,0 +1,12 @@
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c~	2024-03-17 23:33:31.000000000 +0100
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c	2024-03-17 23:46:53.389849541 +0100
+@@ -651,6 +651,9 @@
+     .llseek         = noop_llseek,
+ };
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
++#define DRM_UNLOCKED 0
++#endif
+ static const struct drm_ioctl_desc nv_drm_ioctls[] = {
+ #if defined(NV_DRM_ATOMIC_MODESET_AVAILABLE)
+     DRM_IOCTL_DEF_DRV(NVIDIA_GEM_IMPORT_NVKMS_MEMORY,
