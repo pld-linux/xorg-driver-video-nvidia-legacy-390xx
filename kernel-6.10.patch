@@ -1,0 +1,14 @@
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/os-mlock.c.orig	2024-07-27 00:25:33.105745658 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/os-mlock.c	2024-07-27 00:32:40.621187969 +0200
+@@ -20,8 +20,10 @@
+ {
+ #if defined(NV_UNSAFE_FOLLOW_PFN_PRESENT)
+     return unsafe_follow_pfn(vma, address, pfn);
+-#else
++#elif defined(NV_FOLLOW_PFN_PRESENT)
+     return follow_pfn(vma, address, pfn);
++#else
++    return -1;
+ #endif
+ }
+ 
