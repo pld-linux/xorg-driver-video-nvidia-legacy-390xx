@@ -62,6 +62,7 @@ Patch9:		kernel-6.6-backport-drm_gem_prime_handle_to_fd-changes-from-470.patch
 Patch10:	kernel-6.8.patch
 Patch11:	kernel-6.10.patch
 Patch12:	gcc14.patch
+Patch13:	kernel-6.12.patch
 URL:		https://www.nvidia.com/en-us/drivers/unix/
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
@@ -342,6 +343,7 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %patch10 -p1
 %patch11 -p1
 %patch12 -p1
+%patch13 -p1
 echo 'EXTRA_CFLAGS += -Wno-int-conversion' >> kernel/Kbuild
 
 %build
