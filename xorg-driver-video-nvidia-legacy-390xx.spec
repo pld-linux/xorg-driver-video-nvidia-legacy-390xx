@@ -306,8 +306,8 @@ sterownik nVidii dla Xorg/XFree86.\
 
 %define build_kernel_pkg()\
 cd kernel\
-%{__make} -j1 SYSSRC=%{_kernelsrcdir} clean\
-%{__make} -j1 SYSSRC=%{_kernelsrcdir} IGNORE_CC_MISMATCH=1 NV_VERBOSE=1 CC=%{__cc} module\
+%{__make} SYSSRC=%{_kernelsrcdir} clean\
+%{__make} SYSSRC=%{_kernelsrcdir} IGNORE_CC_MISMATCH=1 NV_VERBOSE=1 CC=%{__cc} module\
 cd ..\
 %install_kernel_modules -D installed -m kernel/nvidia,kernel/nvidia-drm,kernel/nvidia-modeset -d misc\
 %ifarch %{x8664}\
