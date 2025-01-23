@@ -63,6 +63,7 @@ Patch10:	kernel-6.8.patch
 Patch11:	kernel-6.10.patch
 Patch12:	gcc14.patch
 Patch13:	kernel-6.12.patch
+Patch14:	kernel-6.13.patch
 URL:		https://www.nvidia.com/en-us/drivers/unix/
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
@@ -305,8 +306,8 @@ sterownik nVidii dla Xorg/XFree86.\
 
 %define build_kernel_pkg()\
 cd kernel\
-%{__make} SYSSRC=%{_kernelsrcdir} clean\
-%{__make} SYSSRC=%{_kernelsrcdir} IGNORE_CC_MISMATCH=1 NV_VERBOSE=1 CC=%{__cc} module\
+%{__make} -j1 SYSSRC=%{_kernelsrcdir} clean\
+%{__make} -j1 SYSSRC=%{_kernelsrcdir} IGNORE_CC_MISMATCH=1 NV_VERBOSE=1 CC=%{__cc} module\
 cd ..\
 %install_kernel_modules -D installed -m kernel/nvidia,kernel/nvidia-drm,kernel/nvidia-modeset -d misc\
 %ifarch %{x8664}\
@@ -344,6 +345,7 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
+%patch14 -p1
 echo 'EXTRA_CFLAGS += -Wno-int-conversion' >> kernel/Kbuild
 
 %build
