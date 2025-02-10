@@ -29,7 +29,7 @@ exit 1
 
 %define		no_install_post_check_so 1
 
-%define		rel	10
+%define		rel	11
 %define		pname	xorg-driver-video-nvidia-legacy-390xx
 Summary:	Linux Drivers for nVidia GeForce/Quadro Chips
 Summary(hu.UTF-8):	Linux meghajtók nVidia GeForce/Quadro chipekhez
@@ -327,25 +327,25 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 /bin/sh %{SOURCE1} --extract-only
 %setup -qDT -n NVIDIA-Linux-x86_64-%{version}-no-compat32
 %endif
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
+%patch -P 0 -p1
+%patch -P 1 -p1
+%patch -P 2 -p1
+%patch -P 3 -p1
 %ifarch %{x8664}
-%patch4 -p1
+%patch -P 4 -p1
 %endif
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
+%patch -P 5 -p1
+%patch -P 6 -p1
+%patch -P 7 -p1
 %ifarch %{x8664}
-%patch8 -p1
+%patch -P 8 -p1
 %endif
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
+%patch -P 9 -p1
+%patch -P 10 -p1
+%patch -P 11 -p1
+%patch -P 12 -p1
+%patch -P 13 -p1
+%patch -P 14 -p1
 echo 'EXTRA_CFLAGS += -Wno-int-conversion' >> kernel/Kbuild
 
 %build
