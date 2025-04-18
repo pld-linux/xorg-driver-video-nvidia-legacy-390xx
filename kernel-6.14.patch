@@ -1,0 +1,55 @@
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c.orig	2025-04-18 23:23:15.898493891 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c	2025-04-18 23:45:48.184116409 +0200
+@@ -750,7 +750,9 @@
+     .name                   = "nvidia-drm",
+ 
+     .desc                   = "NVIDIA DRM driver",
++#if defined(NV_DRM_DRIVER_HAS_DATE)
+     .date                   = "20160202",
++#endif
+ 
+ #if defined(NV_DRM_DRIVER_HAS_DEVICE_LIST)
+     .device_list            = LIST_HEAD_INIT(nv_drm_driver.device_list),
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh.orig	2025-04-18 23:23:15.897986268 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh	2025-04-18 23:39:01.901337605 +0200
+@@ -4296,6 +4296,30 @@
+             compile_check_conftest "$CODE" "NV_DRM_DRIVER_HAS_GEM_PRIME_CALLBACKS" "" "types"
+         ;;
+ 
++        drm_driver_has_date)
++            #
++            # Determine if the 'drm_driver' structure has a 'date' field.
++            #
++            # Removed by commit cb2e1c2136f7 ("drm: remove driver date from
++            # struct drm_driver and all drivers") in linux-next, expected in
++            # v6.14.
++            #
++            CODE="
++            #if defined(NV_DRM_DRMP_H_PRESENT)
++            #include <drm/drmP.h>
++            #endif
++
++            #if defined(NV_DRM_DRM_DRV_H_PRESENT)
++            #include <drm/drm_drv.h>
++            #endif
++
++            int conftest_drm_driver_has_date(void) {
++                return offsetof(struct drm_driver, date);
++            }"
++
++            compile_check_conftest "$CODE" "NV_DRM_DRIVER_HAS_DATE" "" "types"
++        ;;
++
+         drm_crtc_atomic_check_has_atomic_state_arg)
+             #
+             # Determine if drm_crtc_helper_funcs::atomic_check takes 'state'
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild.orig	2025-04-18 23:23:15.898691348 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild	2025-04-18 23:48:31.933874826 +0200
+@@ -100,6 +100,7 @@
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_has_gem_free_object
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_prime_pages_to_sg_has_drm_device_arg
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_has_gem_prime_callbacks
++NV_CONFTEST_TYPE_COMPILE_TESTS += drm_driver_has_date
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_crtc_atomic_check_has_atomic_state_arg
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_gem_object_vmap_has_map_arg
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_plane_atomic_check_has_atomic_state_arg

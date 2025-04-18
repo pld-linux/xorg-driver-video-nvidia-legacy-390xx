@@ -29,7 +29,7 @@ exit 1
 
 %define		no_install_post_check_so 1
 
-%define		rel	11
+%define		rel	12
 %define		pname	xorg-driver-video-nvidia-legacy-390xx
 Summary:	Linux Drivers for nVidia GeForce/Quadro Chips
 Summary(hu.UTF-8):	Linux meghajtók nVidia GeForce/Quadro chipekhez
@@ -64,6 +64,7 @@ Patch11:	kernel-6.10.patch
 Patch12:	gcc14.patch
 Patch13:	kernel-6.12.patch
 Patch14:	kernel-6.13.patch
+Patch15:	kernel-6.14.patch
 URL:		https://www.nvidia.com/en-us/drivers/unix/
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
@@ -346,6 +347,7 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %patch -P 12 -p1
 %patch -P 13 -p1
 %patch -P 14 -p1
+%patch -P 15 -p1
 echo 'EXTRA_CFLAGS += -Wno-int-conversion' >> kernel/Kbuild
 
 %build
