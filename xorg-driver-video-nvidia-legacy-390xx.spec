@@ -67,8 +67,6 @@ Patch14:	kernel-6.13.patch
 Patch15:	kernel-6.14.patch
 Patch16:	gcc15.patch
 Patch17:	kernel-6.15.patch
-Patch18:	kernel-6.15-x8664.patch
-Patch19:	kernel-6.15-x86.patch
 URL:		https://www.nvidia.com/en-us/drivers/unix/
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.752
@@ -354,13 +352,6 @@ rm -rf NVIDIA-Linux-x86*-%{version}*
 %patch -P 15 -p1
 %patch -P 16 -p1
 %patch -P 17 -p1
-%ifarch %{x8664}
-%patch -P 18 -p1
-%endif
-%ifarch %{ix86}
-%patch -P 19 -p1
-%endif
-echo 'EXTRA_CFLAGS += -Wno-int-conversion' >> kernel/Kbuild
 
 %build
 %{?with_kernel:%{expand:%build_kernel_packages}}

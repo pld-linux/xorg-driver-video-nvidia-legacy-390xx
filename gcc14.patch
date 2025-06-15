@@ -8,7 +8,7 @@ index 093704c..a9db899 100755
  -DKBUILD_BASENAME=\"#conftest$$\" -DKBUILD_MODNAME=\"#conftest$$\" \
 --nostdinc -isystem $ISYSTEM"
 +-nostdinc -isystem $ISYSTEM \
-+-Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-incompatible-pointer-types"
++-Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-incompatible-pointer-types -Wno-int-conversion"
  
      if [ "$OUTPUT" != "$SOURCES" ]; then
          OUTPUT_CFLAGS="-I$OUTPUT/include2 -I$OUTPUT/include"

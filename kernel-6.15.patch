@@ -1,3 +1,15 @@
+diff --git a/kernel/Kbuild b/kernel/Kbuild
+index baa6986..7324345 100644
+--- a/kernel/Kbuild
++++ b/kernel/Kbuild
+@@ -88,6 +88,7 @@
+ endif
+ 
+ 
++ccflags-y += $(EXTRA_CFLAGS)
+ #
+ # The conftest.sh script tests various aspects of the target kernel.
+ # The per-module Kbuild files included above should:
 diff --git a/kernel/common/inc/nv-mm.h b/kernel/common/inc/nv-mm.h
 index acd396d..1e955a4 100644
 --- a/kernel/common/inc/nv-mm.h
