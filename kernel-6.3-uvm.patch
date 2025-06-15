@@ -1,13 +1,12 @@
-diff --git a/kernel/nvidia-uvm/uvm8.c b/kernel/nvidia-uvm/uvm8.c
-index 11cb373..49e1047 100644
---- a/kernel/nvidia-uvm/uvm8.c
-+++ b/kernel/nvidia-uvm/uvm8.c
-@@ -658,7 +658,7 @@ static int uvm_mmap(struct file *filp, struct vm_area_struct *vma)
+diff --color -ur NVIDIA-Linux-x86_64-390.157-no-compat32.orig/kernel/nvidia-uvm/uvm8.c NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-uvm/uvm8.c
+--- NVIDIA-Linux-x86_64-390.157-no-compat32.orig/kernel/nvidia-uvm/uvm8.c	2022-10-12 11:30:28.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-uvm/uvm8.c	2023-05-27 21:31:28.027398157 +0200
+@@ -658,7 +658,7 @@
      // Using VM_DONTCOPY would be nice, but madvise(MADV_DOFORK) can reset that
      // so we have to handle vm_open on fork anyway. We could disable MADV_DOFORK
      // with VM_IO, but that causes other mapping issues.
 -    vma->vm_flags |= VM_MIXEDMAP | VM_DONTEXPAND;
-+    vm_flags_set(vma, VM_MIXEDMAP | VM_DONTEXPAND);
++    nv_vm_flags_set(vma, VM_MIXEDMAP | VM_DONTEXPAND | VM_DONTCOPY);
  
      vma->vm_ops = &uvm_vm_ops_managed;
  

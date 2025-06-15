@@ -3,7 +3,7 @@ diff -ur NVIDIA-Linux-x86_64-390.157-no-compat32.orig/kernel/conftest.sh NVIDIA-
 +++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh	2024-12-05 23:36:51.609889959 +0100
 @@ -4559,6 +4559,29 @@
  
-             compile_check_conftest "$CODE" "NV_ACPI_VIDEO_BACKLIGHT_USE_NATIVE" "" "functions"
+             compile_check_conftest "$CODE" "NV_VM_AREA_STRUCT_HAS_CONST_VM_FLAGS" "" "types"
          ;;
 +
 +        drm_output_poll_changed)

@@ -67,7 +67,7 @@ Patch14:	kernel-6.13.patch
 Patch15:	kernel-6.14.patch
 Patch16:	gcc15.patch
 Patch17:	kernel-6.15.patch
-Patch18:	kernel-6.15-uvm.patch
+Patch18:	kernel-6.15-x8664.patch
 Patch19:	kernel-6.15-x86.patch
 URL:		https://www.nvidia.com/en-us/drivers/unix/
 BuildRequires:	rpm-build >= 4.6
