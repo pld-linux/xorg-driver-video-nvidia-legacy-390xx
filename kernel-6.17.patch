@@ -1,0 +1,94 @@
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh.orig	2025-10-04 18:00:11.127759377 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh	2025-10-04 18:19:17.233544201 +0200
+@@ -3635,6 +3635,25 @@
+             compile_check_conftest "$CODE" "NV_KMEM_CACHE_CREATE_USERCOPY_PRESENT" "" "functions"
+         ;;
+ 
++        drm_fb_create_takes_format_info)
++            #
++            # Determine if a `struct drm_format_info *` is passed into
++            # the .fb_create callback. If so, it will have 4 arguments.
++            # This parameter was added in commit 81112eaac559 ("drm:
++            # Pass the format info to .fb_create") in linux-next
++            # (2025-07-16)
++            CODE="
++            #include <drm/drm_mode_config.h>
++            #include <drm/drm_framebuffer.h>
++
++            static const struct drm_mode_config_funcs funcs;
++            void conftest_drm_fb_create_takes_format_info(void) {
++                funcs.fb_create(NULL, NULL, NULL, NULL); 
++            }"
++
++            compile_check_conftest "$CODE" "NV_DRM_FB_CREATE_TAKES_FORMAT_INFO" "" "types"
++        ;;
++
+         drm_connector_funcs_have_mode_in_name)
+             #
+             # Determine if _mode_ is present in connector function names.
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c.orig	2025-10-04 18:00:11.125327631 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-drv.c	2025-10-04 18:08:08.182118372 +0200
+@@ -137,6 +137,9 @@
+ static struct drm_framebuffer *nv_drm_framebuffer_create(
+     struct drm_device *dev,
+     struct drm_file *file,
++#if defined(NV_DRM_FB_CREATE_TAKES_FORMAT_INFO)
++    const struct drm_format_info *info,
++#endif
+     #if defined(NV_DRM_HELPER_MODE_FILL_FB_STRUCT_HAS_CONST_MODE_CMD_ARG)
+     const struct drm_mode_fb_cmd2 *cmd
+     #else
+@@ -152,6 +155,9 @@
+     fb = nv_drm_internal_framebuffer_create(
+             dev,
+             file,
++#if defined(NV_DRM_FB_CREATE_TAKES_FORMAT_INFO)
++            info,
++#endif
+             &local_cmd);
+ 
+     #if !defined(NV_DRM_HELPER_MODE_FILL_FB_STRUCT_HAS_CONST_MODE_CMD_ARG)
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-fb.c.orig	2025-10-04 18:00:11.106930610 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-fb.c	2025-10-04 18:21:26.081871861 +0200
+@@ -157,6 +157,9 @@
+ struct drm_framebuffer *nv_drm_internal_framebuffer_create(
+     struct drm_device *dev,
+     struct drm_file *file,
++#if defined(NV_DRM_FB_CREATE_TAKES_FORMAT_INFO)
++    const struct drm_format_info *info,
++#endif
+     struct drm_mode_fb_cmd2 *cmd)
+ {
+     struct nv_drm_framebuffer *nv_fb;
+@@ -183,6 +186,9 @@
+         dev,
+         #endif
+         &nv_fb->base,
++#if defined(NV_DRM_FB_CREATE_TAKES_FORMAT_INFO)
++        info,
++#endif
+         cmd);
+ 
+     /*
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-fb.h.orig	2022-10-12 11:30:31.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-fb.h	2025-10-04 18:11:29.866410753 +0200
+@@ -58,6 +58,9 @@
+ struct drm_framebuffer *nv_drm_internal_framebuffer_create(
+     struct drm_device *dev,
+     struct drm_file *file,
++#if defined(NV_DRM_FB_CREATE_TAKES_FORMAT_INFO)
++    const struct drm_format_info *info,
++#endif
+     struct drm_mode_fb_cmd2 *cmd);
+ 
+ #endif /* NV_DRM_ATOMIC_MODESET_AVAILABLE */
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild.orig	2025-10-04 18:26:55.544150286 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild	2025-10-04 18:32:30.990156500 +0200
+@@ -61,6 +61,7 @@
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += drm_atomic_state_ref_counting
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += drm_driver_has_gem_prime_res_obj
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += drm_atomic_helper_connector_dpms
++NV_CONFTEST_FUNCTION_COMPILE_TESTS += drm_fb_create_takes_format_info
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += drm_connector_funcs_have_mode_in_name
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += vmf_insert_pfn
+ NV_CONFTEST_FUNCTION_COMPILE_TESTS += drm_framebuffer_get
