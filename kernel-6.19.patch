@@ -1,0 +1,131 @@
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh.orig	2026-02-18 13:51:28.147602965 +0100
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/conftest.sh	2026-02-18 13:54:45.346651029 +0100
+@@ -4626,6 +4626,35 @@
+ 
+             compile_check_conftest "$CODE" "NV_DRM_OUTPUT_POLL_CHANGED_PRESENT" "" "types"
+         ;;
++
++        dma_map_ops_has_map_phys)
++            #
++            # Determine if .map_phys exists in struct dma_map_ops.
++            #
++            # Commit 14cb413af00c ("dma-mapping: remove unused mapping resource callbacks")
++            # removed .map_resource operation and replaced it with .map_phys.
++            #
++            echo "$CONFTEST_PREAMBLE
++            #include <linux/dma-map-ops.h>
++            int conftest_dma_map_ops_has_map_phys(void) {
++                return offsetof(struct dma_map_ops, map_phys);
++            }
++            int conftest_dma_map_ops_has_unmap_phys(void) {
++                return offsetof(struct dma_map_ops, unmap_phys);
++            }" > conftest$$.c
++
++            $CC $CFLAGS -c conftest$$.c > /dev/null 2>&1
++            rm -f conftest$$.c
++
++            if [ -f conftest$$.o ]; then
++                echo "#define NV_DMA_MAP_OPS_HAS_MAP_PHYS" | append_conftest "types"
++                rm -f conftest$$.o
++                return
++            else
++                echo "#undef NV_DMA_MAP_OPS_HAS_MAP_PHYS" | append_conftest "types"
++                return
++            fi
++        ;;
+     esac
+ }
+ 
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild.orig	2026-02-18 13:55:21.063415510 +0100
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm.Kbuild	2026-02-18 13:55:28.486769155 +0100
+@@ -110,3 +110,4 @@
+ NV_CONFTEST_TYPE_COMPILE_TESTS += dma_resv_reserve_fences
+ NV_CONFTEST_TYPE_COMPILE_TESTS += reservation_object_reserve_shared_has_num_fences_arg
+ NV_CONFTEST_TYPE_COMPILE_TESTS += drm_output_poll_changed
++NV_CONFTEST_TYPE_COMPILE_TESTS += dma_map_ops_has_map_phys
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/nv-dma.c.orig	2022-10-12 11:30:26.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/nv-dma.c	2026-02-18 13:58:09.998756418 +0100
+@@ -619,7 +619,11 @@
+ #endif
+     }
+ 
++#if defined(NV_DMA_MAP_OPS_HAS_MAP_PHYS)
++    return (ops->map_phys != NULL);
++#else
+     return (ops->map_resource != NULL);
++#endif
+ #else
+     return NV_FALSE;
+ #endif
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/common/inc/nv-time.h.orig	2022-10-12 11:30:26.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/common/inc/nv-time.h	2026-02-18 14:01:56.564016816 +0100
+@@ -36,6 +36,19 @@
+ typedef struct __kernel_old_timeval nv_timeval;
+ #endif
+ 
++/*
++ * in_hardirq() was added in v5.11-rc1 (2020-12-15) to replace in_irq().
++ * Fall back to in_irq() for older kernels that don't have in_hardirq().
++ */
++static inline NvBool nv_in_hardirq(void)
++{
++#if defined(in_hardirq)
++    return in_hardirq();
++#else
++    return in_irq();
++#endif
++}
++
+ static inline void nv_gettimeofday(nv_timeval *tv)
+ {
+ #ifdef NV_DO_GETTIMEOFDAY_PRESENT
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/nvlink_linux.c.orig	2022-10-12 11:30:31.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/nvlink_linux.c	2026-02-18 14:03:49.213742635 +0100
+@@ -570,7 +570,7 @@
+ 
+     nv_gettimeofday(&tm_aux);
+ 
+-    if (in_irq() && (ms > NV_MAX_ISR_DELAY_MS))
++    if (nv_in_hardirq() && (ms > NV_MAX_ISR_DELAY_MS))
+     {
+         return;
+     }
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/os-interface.c.orig	2022-10-12 11:30:26.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia/os-interface.c	2026-02-18 14:04:32.390359212 +0100
+@@ -193,7 +193,7 @@
+ 
+ BOOL NV_API_CALL os_is_isr(void)
+ {
+-    return (in_irq());
++    return (nv_in_hardirq());
+ }
+ 
+ // return TRUE if the caller is the super-user
+@@ -510,7 +510,7 @@
+     nv_gettimeofday(&tm1);
+ #endif
+ 
+-    if (in_irq() && (MicroSeconds > NV_MAX_ISR_DELAY_US))
++    if (nv_in_hardirq() && (MicroSeconds > NV_MAX_ISR_DELAY_US))
+         return NV_ERR_GENERIC;
+     
+     mdelay_safe_msec = MicroSeconds / 1000;
+@@ -555,7 +555,7 @@
+     tm_start = tm_aux;
+ #endif
+ 
+-    if (in_irq() && (MilliSeconds > NV_MAX_ISR_DELAY_MS))
++    if (nv_in_hardirq() && (MilliSeconds > NV_MAX_ISR_DELAY_MS))
+         return NV_ERR_GENERIC;
+ 
+     if (!NV_MAY_SLEEP()) 
+--- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-priv.h.orig	2022-10-12 11:30:31.000000000 +0200
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/nvidia-drm/nvidia-drm-priv.h	2026-02-18 14:13:17.475133070 +0100
+@@ -30,6 +30,7 @@
+ #if defined(NV_DRM_DRMP_H_PRESENT)
+ #include <drm/drmP.h>
+ #endif
++#include <drm/drm_print.h>
+ 
+ #if defined(NV_DRM_DRM_DEVICE_H_PRESENT)
+ #include <drm/drm_device.h>
