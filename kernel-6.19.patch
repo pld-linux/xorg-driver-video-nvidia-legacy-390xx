@@ -58,8 +58,16 @@
      return NV_FALSE;
  #endif
 --- NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/common/inc/nv-time.h.orig	2022-10-12 11:30:26.000000000 +0200
-+++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/common/inc/nv-time.h	2026-02-18 14:01:56.564016816 +0100
-@@ -36,6 +36,19 @@
++++ NVIDIA-Linux-x86_64-390.157-no-compat32/kernel/common/inc/nv-time.h	2026-02-18 18:45:08.405988097 +0100
+@@ -25,6 +25,7 @@
+ 
+ #include "conftest.h"
+ 
++#include <linux/sched.h>
+ #include <linux/time.h>
+ #if defined(NV_LINUX_KTIME_H_PRESENT)
+ #include <linux/ktime.h>
+@@ -36,6 +37,19 @@
  typedef struct __kernel_old_timeval nv_timeval;
  #endif
  
